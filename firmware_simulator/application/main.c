@@ -22,7 +22,7 @@ All Global variable names shall start with "G_"
 Global variable definitions with scope limited to this local application.
 Variable names shall start with "Main_" and be declared as static.
 ***********************************************************************************************************************/
-
+static u8 Main_u8Servers = 0; /*number of people slinging drinks*/
 /***********************************************************************************************************************
 Main Program
 ***********************************************************************************************************************/
@@ -30,6 +30,10 @@ Main Program
 void main(void)
 {
 
+  u32 u32UselessVariable;
+  u32 au32BigArray[] = {5, 4, 3, 2, 1};
+  DrinkType aeDrinkArray[3] = {BEER, SHOOTER};
+  
   while(1)
   {
     
