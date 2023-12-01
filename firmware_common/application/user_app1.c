@@ -62,7 +62,7 @@ Variable names shall start with "UserApp1_<type>" and be declared as static.
 static fnCode_type UserApp1_pfStateMachine;               /*!< @brief The state machine function pointer */
 //static u32 UserApp1_u32Timeout;                           /*!< @brief Timeout counter used across states */
 
-
+static u8 UserApp_au8MyName[] = "Nicole Heather";
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -92,6 +92,21 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+  u8 u8Button0Label[] = "0";
+  u8 u8Button1Label[] = "1";
+  u8 u8Button2Label[] = "2";
+  u8 u8Button3Label[] = "3";
+  
+  LcdMessage(LINE1_START_ADDR, UserApp_au8MyName);
+  LcdClearChars(LINE1_START_ADDR + 14, 4);
+  
+  LcdMessage(LINE2_START_ADDR, u8Button0Label);
+  LcdMessage(LINE2_START_ADDR + 6, u8Button1Label);
+  LcdMessage(LINE2_END_ABSOLUTE - 26, u8Button2Label);
+  LcdMessage(LINE2_END_ABSOLUTE - 20 , u8Button3Label);
+  
+  LcdCommand(LCD_HOME_CMD);
+  
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -140,6 +155,19 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
+  static bool isCursorOn = FALSE;
+  if(WasButtonPressed(BUTTON0)){
+    ButtonAcknowledge(BUTTON0);
+    if(isCursorOn){
+      LcdCommand(LCD_DISPLAY_CMD | LCD_DISPLAY_ON);
+      isCursorOn = FALSE;
+    }
+    else{
+      LcdCommand(LCD_DISPLAY_CMD | LCD_DISPLAY_ON | LCD_DISPLAY_CURSOR | LCD_DISPLAY_BLINK);
+      isCursorOn = TRUE;
+    }
+  }
+    
     
 } /* end UserApp1SM_Idle() */
      
