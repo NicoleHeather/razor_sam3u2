@@ -155,6 +155,7 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
+  //PWMAudioOn(
   static bool isCursorOn = FALSE;
   if(WasButtonPressed(BUTTON0)){
     ButtonAcknowledge(BUTTON0);
