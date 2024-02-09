@@ -46,7 +46,6 @@ All Global variable names shall start with "G_<type>UserApp1"
 /* New variables */
 volatile u32 G_u32UserApp1Flags;                          /*!< @brief Global state flags */
 
-
 /*--------------------------------------------------------------------------------------------------------------------*/
 /* Existing variables (defined in other files -- should all contain the "extern" keyword) */
 extern volatile u32 G_u32SystemTime1ms;                   /*!< @brief From main.c */
@@ -60,6 +59,7 @@ Global variable definitions with scope limited to this local application.
 Variable names shall start with "UserApp1_<type>" and be declared as static.
 ***********************************************************************************************************************/
 static fnCode_type UserApp1_pfStateMachine;               /*!< @brief The state machine function pointer */
+static struct vehicle car;
 //static u32 UserApp1_u32Timeout;                           /*!< @brief Timeout counter used across states */
 
 
@@ -92,6 +92,12 @@ Promises:
 */
 void UserApp1Initialize(void)
 {
+  //1/10 ms for LCD update
+  LcdCommand(LCD_CLEAR_CMD);
+  u8 u8message[] = "0";
+  car.u8Character = u8message;
+  car.u32PositionA = LINE2_START_ADDR + 6;
+  LcdMessage(car.u32PositionA, car.u8Character);
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -140,7 +146,7 @@ State Machine Function Definitions
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
 {
-    
+    ButtonCheck();
 } /* end UserApp1SM_Idle() */
      
 
@@ -151,6 +157,30 @@ static void UserApp1SM_Error(void)
   
 } /* end UserApp1SM_Error() */
 
+void ButtonCheck(void){
+
+  if(WasButtonPressed(BUTTON1)){
+    ButtonAcknowledge(BUTTON1);
+    LcdClearChars(car.u32PositionA, 1);
+    LedOff(BLUE);
+    LedOn(PURPLE);
+    car.u32PositionA  = car.u32PositionA - 2;
+    LcdMessage(car.u32PositionA, car.u8Character);
+  }
+  
+  else if (WasButtonPressed(BUTTON2)){
+    ButtonAcknowledge(BUTTON2);
+    LcdClearChars(car.u32PositionA, 1);
+    LedOff(PURPLE);
+    LedOn(BLUE);
+    car.u32PositionA  = car.u32PositionA + 2;
+    LcdMessage(car.u32PositionA, car.u8Character);
+  }
+}
+
+void GameState(void){
+  ButtonCheck();
+}
 
 
 
