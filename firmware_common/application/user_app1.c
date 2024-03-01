@@ -60,6 +60,8 @@ Variable names shall start with "UserApp1_<type>" and be declared as static.
 ***********************************************************************************************************************/
 static fnCode_type UserApp1_pfStateMachine;               /*!< @brief The state machine function pointer */
 static struct vehicle car;
+static bool Start = FALSE;
+static bool Pause = FALSE;
 //static u32 UserApp1_u32Timeout;                           /*!< @brief Timeout counter used across states */
 
 
@@ -94,10 +96,12 @@ void UserApp1Initialize(void)
 {
   //1/10 ms for LCD update
   LcdCommand(LCD_CLEAR_CMD);
-  u8 u8message[] = "0";
-  car.u8Character = u8message;
-  car.u32PositionA = LINE2_START_ADDR + 6;
+  u8 u8message1[] = "Press Buttons 1 or 2";
+  u8 u8message2[] = "L     R     P";
+  car.u8Character = u8message1;
+  car.u32PositionA = LINE1_START_ADDR;
   LcdMessage(car.u32PositionA, car.u8Character);
+  LcdMessage(LINE2_START_ADDR + 7, u8message2);
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -145,8 +149,8 @@ State Machine Function Definitions
 /*-------------------------------------------------------------------------------------------------------------------*/
 /* What does this state do? */
 static void UserApp1SM_Idle(void)
-{       
-    ButtonCheck();
+{     
+  GameState();
 } /* end UserApp1SM_Idle() */
      
 
@@ -158,30 +162,96 @@ static void UserApp1SM_Error(void)
 } /* end UserApp1SM_Error() */
 
 void ButtonCheck(void){
+  
+  static u32 u32delayCount = 500;
+  static bool Button1Pressed = FALSE;
+  static bool Button2Pressed = FALSE;
 
-  if(WasButtonPressed(BUTTON1)){
+  if(WasButtonPressed(BUTTON1)  && !Pause){
     ButtonAcknowledge(BUTTON1);
-    LcdClearChars(car.u32PositionA, 1);
+    
+    Button1Pressed = TRUE;
+    if(Button2Pressed == TRUE){
+      LcdClearChars(car.u32PositionA, 2);
+      Button2Pressed = FALSE;
+    }
+    
+    for(u32 i = 0; i < u32delayCount; i++){
+      
+    }
+    
     LedOff(BLUE);
     LedOn(PURPLE);
-    car.u32PositionA  = car.u32PositionA - 2;
+    car.u32PositionA  = car.u32PositionA - 1;
+    u8 u8newCar[] = "0 ";
+    car.u8Character = u8newCar;
     LcdMessage(car.u32PositionA, car.u8Character);
   }
   
-  else if (WasButtonPressed(BUTTON2)){
+  else if (WasButtonPressed(BUTTON2)  && !Pause){
     ButtonAcknowledge(BUTTON2);
-    LcdClearChars(car.u32PositionA, 1);
+    
+    Button2Pressed = TRUE;
+    if(Button1Pressed == TRUE){
+      LcdClearChars(car.u32PositionA, 2);
+      Button1Pressed = FALSE;
+    }
+    
+    for(u32 i = 0; i < u32delayCount; i++){
+      
+    }
+    
     LedOff(PURPLE);
     LedOn(BLUE);
-    car.u32PositionA  = car.u32PositionA + 2;
+    car.u32PositionA  = car.u32PositionA + 1;
+    u8 u8newCar[] = " 0";
+    car.u8Character = u8newCar;
     LcdMessage(car.u32PositionA, car.u8Character);
   }
+  
+  //Add pause button Later 
+  else if (WasButtonPressed(BUTTON3) && !Pause){
+    ButtonAcknowledge(BUTTON3);
+    Pause = TRUE;
+  }
+  
 }
 
 void GameState(void){
-  ButtonCheck();
+  
+  if(!Start){
+    GameStart();
+  }
+  
+  else if(Start){
+    ButtonCheck();
+  }
+  
+  else if(Pause){
+    PauseGame();
+  }
+  
 }
 
+void GameStart(void){
+  if(WasButtonPressed(BUTTON2) || WasButtonPressed(BUTTON1)){
+    LcdClearChars(LINE1_START_ADDR, 40);
+    LcdClearChars(LINE2_START_ADDR, 40);
+    car.u32PositionA = LINE2_START_ADDR + 8;
+    Start = TRUE;
+    Pause = FALSE;
+  }
+}
+
+void PauseGame(){
+  Start = FALSE;
+  LcdClearChars(car.u32PositionA, 4);
+  u8 u8newMessage1[] = "Game is Paused";
+  u8 u8newMessage2[] = "LED    #     S";
+  LcdMessage(LINE1_START_ADDR, u8newMessage1);
+  LcdMessage(LINE2_START_ADDR + 6, u8newMessage2);
+   
+}
 
 
 /*--------------------------------------------------------------------------------------------------------------------*/
